@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Plus, X, Save } from "lucide-react";
+import { CldImage } from "next-cloudinary";
 
 import Container from "@/components/Container";
 import { Button } from "@/components/ui/button";
@@ -162,10 +163,12 @@ const MediaGallery = ({ resources }: MediaGalleryProps) => {
                         }`}
                         href="#"
                       >
-                        <img
+                        <CldImage
                           width={resource.width}
                           height={resource.height}
-                          src={resource.secure_url}
+                          src={resource.public_id}
+                          alt=""
+                          sizes="(min-width: 768px) 33vw, (min-width: 1024px) 25 vw, (min-width: 1280px) 20vw, 50vw"
                         />
                       </Link>
                     </div>
