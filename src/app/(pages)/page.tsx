@@ -10,7 +10,7 @@ cloudinary.config({
 
 export default async function Home() {
   const { resources } = await cloudinary.api.resources();
-  console.log(resources);
+
   return (
     <div className="h-full mt-6">
       <MediaGallery resources={resources} />
