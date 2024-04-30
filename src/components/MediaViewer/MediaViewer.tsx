@@ -62,6 +62,7 @@ const MediaViewer = ({ resource }: { resource: CloudinaryResource }) => {
   const [infoSheetIsOpen, setInfoSheetIsOpen] = useState(false);
   const [deletion, setDeletion] = useState<Deletion>();
 
+  const [version, setVersion] = useState<number>(1);
   const [enhancement, setEnhancement] = useState<string>();
   const [crop, setCrop] = useState<string>();
   const [filter, setFilter] = useState<string>();
@@ -113,6 +114,8 @@ const MediaViewer = ({ resource }: { resource: CloudinaryResource }) => {
     transformations.art = filter;
   }
 
+  const hasTransformations = Object.entries(transformations).length > 0;
+
   // Canvas sizing based on the image dimensions. The tricky thing about
   // showing a single image in a space like this in a responsive way is trying
   // to take up as much room as possible without distorting it or upscaling
@@ -151,6 +154,15 @@ const MediaViewer = ({ resource }: { resource: CloudinaryResource }) => {
   }
 
   /**
+   * discardChanges
+   */
+  function discardChanges() {
+    setEnhancement(undefined);
+    setCrop(undefined);
+    setFilter(undefined);
+  }
+
+  /**
    * handleOnDeletionOpenChange
    */
 
@@ -184,8 +196,9 @@ const MediaViewer = ({ resource }: { resource: CloudinaryResource }) => {
       }),
     }).then((r) => r.json());
 
-    // console.log("url: ", url);
-    // console.log("results: ", results);
+    closeMenus();
+    discardChanges();
+    setVersion(Date.now());
   }
 
   // Listen for clicks outside of the panel area and if determined
@@ -459,42 +472,51 @@ const MediaViewer = ({ resource }: { resource: CloudinaryResource }) => {
             </TabsContent>
           </Tabs>
           <SheetFooter className="gap-2 sm:flex-col">
-            <div className="grid grid-cols-[1fr_4rem] gap-2">
-              <Button
-                variant="ghost"
-                className="w-full h-14 text-left justify-center items-center bg-blue-500"
-                onClick={handleOnSave}
-              >
-                <span className="text-[1.01rem]">Save</span>
-              </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="w-full h-14 text-left justify-center items-center bg-blue-500"
-                  >
-                    <span className="sr-only">More Options</span>
-                    <ChevronDown className="h-5 w-5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  className="w-56"
-                  data-exclude-close-on-click={true}
+            {hasTransformations && (
+              <div className="grid grid-cols-[1fr_4rem] gap-2">
+                <Button
+                  variant="ghost"
+                  className="w-full h-14 text-left justify-center items-center bg-blue-500"
+                  onClick={handleOnSave}
                 >
-                  <DropdownMenuGroup>
-                    <DropdownMenuItem>
-                      <span>Save as Copy</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuGroup>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+                  <span className="text-[1.01rem]">Save</span>
+                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="w-full h-14 text-left justify-center items-center bg-blue-500"
+                    >
+                      <span className="sr-only">More Options</span>
+                      <ChevronDown className="h-5 w-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    className="w-56"
+                    data-exclude-close-on-click={true}
+                  >
+                    <DropdownMenuGroup>
+                      <DropdownMenuItem>
+                        <span>Save as Copy</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            )}
             <Button
               variant="outline"
-              className="w-full h-14 text-left justify-center items-center bg-transparent border-zinc-600"
-              onClick={() => closeMenus()}
+              className={`w-full h-14 text-left justify-center items-center ${
+                hasTransformations ? "bg-red-500" : "bg-transparent"
+              } border-zinc-600`}
+              onClick={() => {
+                closeMenus();
+                discardChanges();
+              }}
             >
-              <span className="text-[1.01rem]">Close</span>
+              <span className="text-[1.01rem]">
+                {hasTransformations ? "Cancel" : "Close"}
+              </span>
             </Button>
           </SheetFooter>
         </SheetContent>
@@ -591,13 +613,14 @@ const MediaViewer = ({ resource }: { resource: CloudinaryResource }) => {
 
       <div className="relative flex justify-center items-center align-center w-full h-full">
         <CldImage
-          key={JSON.stringify(transformations)}
+          key={`${JSON.stringify(transformations)}-${version}`}
           className="object-contain"
           width={resource.width}
           height={resource.height}
           src={resource.public_id}
           alt={`Image ${resource.public_id}`}
           style={imgStyles}
+          version={version}
           {...transformations}
         />
       </div>
