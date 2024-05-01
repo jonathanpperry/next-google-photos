@@ -59,7 +59,7 @@ interface Deletion {
 
 const MediaViewer = ({ resource }: { resource: CloudinaryResource }) => {
   const router = useRouter();
-  // const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
   const sheetFiltersRef = useRef<HTMLDivElement | null>(null);
   const sheetInfoRef = useRef<HTMLDivElement | null>(null);
@@ -204,6 +204,8 @@ const MediaViewer = ({ resource }: { resource: CloudinaryResource }) => {
       }),
     }).then((r) => r.json());
 
+    invalidateQueries();
+
     closeMenus();
     discardChanges();
     setVersion(Date.now());
@@ -231,6 +233,8 @@ const MediaViewer = ({ resource }: { resource: CloudinaryResource }) => {
       }),
     }).then((r) => r.json());
 
+    invalidateQueries();
+
     router.push(`/resources/${data.asset_id}`);
   }
 
@@ -251,7 +255,18 @@ const MediaViewer = ({ resource }: { resource: CloudinaryResource }) => {
       }),
     });
 
+    invalidateQueries();
+
     router.push("/");
+  }
+
+  function invalidateQueries() {
+    queryClient.invalidateQueries({
+      queryKey: [
+        "resources",
+        String(process.env.NEXT_PUBLIC_CLOUDINARY_LIBRARY_TAG),
+      ],
+    });
   }
 
   // Listen for clicks outside of the panel area and if determined
