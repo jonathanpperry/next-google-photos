@@ -47,12 +47,15 @@ import {
 import { CloudinaryResource } from "@/types/cloudinary";
 import { CldImageProps, getCldImageUrl } from "next-cloudinary";
 import CldImage from "../CldImage";
+import { useRouter } from "next/navigation";
 
 interface Deletion {
   state: string;
 }
 
 const MediaViewer = ({ resource }: { resource: CloudinaryResource }) => {
+  const router = useRouter();
+
   const sheetFiltersRef = useRef<HTMLDivElement | null>(null);
   const sheetInfoRef = useRef<HTMLDivElement | null>(null);
 
@@ -199,6 +202,31 @@ const MediaViewer = ({ resource }: { resource: CloudinaryResource }) => {
     closeMenus();
     discardChanges();
     setVersion(Date.now());
+  }
+
+  /**
+   * handleOnSaveCopy
+   */
+  async function handleOnSaveCopy() {
+    const url = getCldImageUrl({
+      width: resource.width,
+      height: resource.height,
+      src: resource.public_id,
+      format: "default",
+      quality: "default",
+      ...transformations,
+    });
+
+    await fetch(url);
+
+    const { data } = await fetch("/api/upload", {
+      method: "POST",
+      body: JSON.stringify({
+        url,
+      }),
+    }).then((r) => r.json());
+
+    router.push(`/resources/${data.asset_id}`);
   }
 
   // Listen for clicks outside of the panel area and if determined
@@ -496,7 +524,7 @@ const MediaViewer = ({ resource }: { resource: CloudinaryResource }) => {
                     data-exclude-close-on-click={true}
                   >
                     <DropdownMenuGroup>
-                      <DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleOnSaveCopy}>
                         <span>Save as Copy</span>
                       </DropdownMenuItem>
                     </DropdownMenuGroup>
