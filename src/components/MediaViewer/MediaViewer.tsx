@@ -18,6 +18,7 @@ import {
   Square,
   RectangleHorizontal,
   RectangleVertical,
+  Loader2,
 } from "lucide-react";
 
 import Container from "@/components/Container";
@@ -44,10 +45,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
 import { CloudinaryResource } from "@/types/cloudinary";
 import { CldImageProps, getCldImageUrl } from "next-cloudinary";
-import CldImage from "../CldImage";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
+
+import CldImage from "../CldImage";
 
 interface Deletion {
   state: string;
@@ -55,6 +59,7 @@ interface Deletion {
 
 const MediaViewer = ({ resource }: { resource: CloudinaryResource }) => {
   const router = useRouter();
+  // const queryClient = useQueryClient();
 
   const sheetFiltersRef = useRef<HTMLDivElement | null>(null);
   const sheetInfoRef = useRef<HTMLDivElement | null>(null);
@@ -229,6 +234,26 @@ const MediaViewer = ({ resource }: { resource: CloudinaryResource }) => {
     router.push(`/resources/${data.asset_id}`);
   }
 
+  /**
+   * handleOnDelete
+   */
+  async function handleOnDelete() {
+    if (deletion?.state === "deleting") return;
+
+    setDeletion({
+      state: "deleting",
+    });
+
+    await fetch("/api/delete", {
+      method: "POST",
+      body: JSON.stringify({
+        publicId: resource.public_id,
+      }),
+    });
+
+    router.push("/");
+  }
+
   // Listen for clicks outside of the panel area and if determined
   // to be outside, close the panel. This is marked by using
   // a data attribute to provide an easy way to reference it on
@@ -260,7 +285,7 @@ const MediaViewer = ({ resource }: { resource: CloudinaryResource }) => {
       {/** Modal for deletion */}
 
       <Dialog
-        open={!!deletion?.state}
+        open={deletion && ["confirm", "deleting"].includes(deletion.state)}
         onOpenChange={handleOnDeletionOpenChange}
       >
         <DialogContent data-exclude-close-on-click={true}>
@@ -270,8 +295,14 @@ const MediaViewer = ({ resource }: { resource: CloudinaryResource }) => {
             </DialogTitle>
           </DialogHeader>
           <DialogFooter className="justify-center sm:justify-center">
-            <Button variant="destructive">
-              <Trash2 className="h-4 w-4 mr-2" /> Delete
+            <Button variant="destructive" onClick={handleOnDelete}>
+              {deletion?.state === "deleting" && (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              )}
+              {deletion?.state === "deleting" && (
+                <Trash2 className="h-4 w-4 mr-2" />
+              )}
+              Delete
             </Button>
           </DialogFooter>
         </DialogContent>
