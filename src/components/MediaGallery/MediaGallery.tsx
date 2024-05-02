@@ -3,9 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Plus, X, Save } from "lucide-react";
-import { CldImage } from "next-cloudinary";
 
 import Container from "@/components/Container";
+import CldImage from "@/components/CldImage";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
