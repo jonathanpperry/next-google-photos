@@ -25,10 +25,17 @@ import {
 
 import { CloudinaryResource } from "@/types/cloudinary";
 import { useResources } from "@/hooks/use-resources";
+import { getCollage } from "@/lib/creations";
 
 interface MediaGalleryProps {
   resources: Array<CloudinaryResource>;
   tag?: string;
+}
+
+interface Creation {
+  state: string;
+  url: string;
+  type: string;
 }
 
 const MediaGallery = ({
@@ -41,7 +48,7 @@ const MediaGallery = ({
   });
 
   const [selected, setSelected] = useState<Array<string>>([]);
-  const [creation, setCreation] = useState();
+  const [creation, setCreation] = useState<Creation>();
 
   /**
    * handleOnClearSelection
@@ -60,6 +67,16 @@ const MediaGallery = ({
       setCreation(undefined);
     }
   }
+  /**
+   * handleOnCreateCollage
+   */
+  function handleOnCreateCollage() {
+    setCreation({
+      state: "created",
+      url: getCollage(selected),
+      type: "collage",
+    });
+  }
 
   return (
     <>
@@ -70,6 +87,21 @@ const MediaGallery = ({
           <DialogHeader>
             <DialogTitle>Save your creation?</DialogTitle>
           </DialogHeader>
+          {creation?.url && (
+            <div>
+              <CldImage
+                width={1200}
+                height={1200}
+                crop={{
+                  type: "fill",
+                  source: true,
+                }}
+                src={creation.url}
+                alt="creation"
+                preserveTransformations
+              />
+            </div>
+          )}
           <DialogFooter className="justify-end sm:justify-end">
             <Button>
               <Save className="h-4 w-4 mr-2" />
@@ -107,9 +139,11 @@ const MediaGallery = ({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56">
                   <DropdownMenuGroup>
-                    <DropdownMenuItem>
-                      <span>Option</span>
-                    </DropdownMenuItem>
+                    {selected.length > 1 && (
+                      <DropdownMenuItem onClick={handleOnCreateCollage}>
+                        <span>Collage</span>
+                      </DropdownMenuItem>
+                    )}
                   </DropdownMenuGroup>
                 </DropdownMenuContent>
               </DropdownMenu>
