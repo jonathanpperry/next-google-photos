@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Plus, X, Save } from "lucide-react";
+import { Plus, X, Save, Loader2 } from "lucide-react";
 
 import Container from "@/components/Container";
 import CldImage from "@/components/CldImage";
@@ -42,7 +42,7 @@ const MediaGallery = ({
   resources: initialResources,
   tag,
 }: MediaGalleryProps) => {
-  const { resources } = useResources({
+  const { resources, addResources } = useResources({
     initialResources,
     tag,
   });
@@ -67,6 +67,7 @@ const MediaGallery = ({
       setCreation(undefined);
     }
   }
+
   /**
    * handleOnCreateCollage
    */
@@ -76,6 +77,37 @@ const MediaGallery = ({
       url: getCollage(selected),
       type: "collage",
     });
+  }
+
+  /**
+   * handleOnSaveCreation
+   */
+  async function handleOnSaveCreation() {
+    if (typeof creation?.url !== "string" || creation?.state === "saving") {
+      return;
+    }
+
+    setCreation((prev) => {
+      if (!prev) return;
+
+      return {
+        ...prev,
+        state: "saving",
+      };
+    });
+
+    await fetch(creation.url);
+
+    const { data } = await fetch("/api/upload", {
+      method: "POST",
+      body: JSON.stringify({
+        url: creation.url,
+      }),
+    }).then((r) => r.json());
+
+    addResources([data]);
+    setCreation(undefined);
+    setSelected([]);
   }
 
   return (
@@ -103,8 +135,13 @@ const MediaGallery = ({
             </div>
           )}
           <DialogFooter className="justify-end sm:justify-end">
-            <Button>
-              <Save className="h-4 w-4 mr-2" />
+            <Button onClick={handleOnSaveCreation}>
+              {creation?.state === "saving" && (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              )}
+              {creation?.state !== "saving" && (
+                <Save className="h-4 w-4 mr-2" />
+              )}
               Save to Library
             </Button>
           </DialogFooter>
