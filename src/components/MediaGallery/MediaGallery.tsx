@@ -2,7 +2,15 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Plus, X, Save, Loader2 } from "lucide-react";
+import {
+  Plus,
+  X,
+  Save,
+  Loader2,
+  SquareStack,
+  Droplet,
+  LayoutPanelLeft,
+} from "lucide-react";
 
 import Container from "@/components/Container";
 import CldImage from "@/components/CldImage";
@@ -34,7 +42,7 @@ interface MediaGalleryProps {
 
 interface Creation {
   state: string;
-  url: string;
+  url?: string;
   type: string;
 }
 
@@ -102,8 +110,8 @@ const MediaGallery = ({
     }).then((r) => r.json());
 
     setCreation({
-      state: "created",
-      url,
+      state: "creating",
+      url: undefined,
       type: "color-pop",
     });
   }
@@ -145,31 +153,41 @@ const MediaGallery = ({
 
       <Dialog open={!!creation} onOpenChange={handleOnCreationOpenChange}>
         <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Save your creation?</DialogTitle>
-          </DialogHeader>
-          {creation?.url && (
-            <div>
-              <CldImage
-                width={1200}
-                height={1200}
-                src={creation.url}
-                alt="creation"
-                preserveTransformations
-              />
+          {creation?.state && ["creating"].includes(creation?.state) && (
+            <div className="flex items-center justify-center p-12">
+              <Loader2 className="h-12 w-12 mr-2 animate-spin" />
             </div>
           )}
-          <DialogFooter className="justify-end sm:justify-end">
-            <Button onClick={handleOnSaveCreation}>
-              {creation?.state === "saving" && (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              )}
-              {creation?.state !== "saving" && (
-                <Save className="h-4 w-4 mr-2" />
-              )}
-              Save to Library
-            </Button>
-          </DialogFooter>
+          {creation?.state &&
+            ["created", "saving"].includes(creation?.state) && (
+              <>
+                <DialogHeader>
+                  <DialogTitle>Save your creation?</DialogTitle>
+                </DialogHeader>
+                {creation?.url && (
+                  <div>
+                    <CldImage
+                      width={1200}
+                      height={1200}
+                      src={creation.url}
+                      alt="creation"
+                      preserveTransformations
+                    />
+                  </div>
+                )}
+                <DialogFooter className="justify-end sm:justify-end">
+                  <Button onClick={handleOnSaveCreation}>
+                    {creation?.state === "saving" && (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    )}
+                    {creation?.state !== "saving" && (
+                      <Save className="h-4 w-4 mr-2" />
+                    )}
+                    Save to Library
+                  </Button>
+                </DialogFooter>
+              </>
+            )}
         </DialogContent>
       </Dialog>
 
@@ -203,16 +221,19 @@ const MediaGallery = ({
                   <DropdownMenuGroup>
                     {selected.length === 1 && (
                       <DropdownMenuItem onClick={handleOnCreateAnimation}>
+                        <SquareStack className="w-4 h-4 mr-2" />
                         <span>Animation</span>
                       </DropdownMenuItem>
                     )}
                     {selected.length === 1 && (
                       <DropdownMenuItem onClick={handleOnCreateColorPop}>
+                        <Droplet className="w-4 h-4 mr-2" />
                         <span>Color Pop</span>
                       </DropdownMenuItem>
                     )}
                     {selected.length > 1 && (
                       <DropdownMenuItem onClick={handleOnCreateCollage}>
+                        <LayoutPanelLeft className="w-4 h-4 mr-2" />
                         <span>Collage</span>
                       </DropdownMenuItem>
                     )}
