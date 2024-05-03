@@ -25,7 +25,7 @@ import {
 
 import { CloudinaryResource } from "@/types/cloudinary";
 import { useResources } from "@/hooks/use-resources";
-import { getCollage } from "@/lib/creations";
+import { getAnimation, getCollage } from "@/lib/creations";
 
 interface MediaGalleryProps {
   resources: Array<CloudinaryResource>;
@@ -110,6 +110,17 @@ const MediaGallery = ({
     setSelected([]);
   }
 
+  /**
+   * handleOnCreateAnimation
+   */
+  function handleOnCreateAnimation() {
+    setCreation({
+      state: "created",
+      url: getAnimation(selected),
+      type: "animation",
+    });
+  }
+
   return (
     <>
       {/** Popup modal used to preview and confirm new creations */}
@@ -124,10 +135,6 @@ const MediaGallery = ({
               <CldImage
                 width={1200}
                 height={1200}
-                crop={{
-                  type: "fill",
-                  source: true,
-                }}
                 src={creation.url}
                 alt="creation"
                 preserveTransformations
@@ -176,6 +183,11 @@ const MediaGallery = ({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56">
                   <DropdownMenuGroup>
+                    {selected.length === 1 && (
+                      <DropdownMenuItem onClick={handleOnCreateAnimation}>
+                        <span>Animation</span>
+                      </DropdownMenuItem>
+                    )}
                     {selected.length > 1 && (
                       <DropdownMenuItem onClick={handleOnCreateCollage}>
                         <span>Collage</span>
