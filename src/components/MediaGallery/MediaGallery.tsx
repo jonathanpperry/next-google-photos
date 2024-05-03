@@ -139,6 +139,7 @@ const MediaGallery = ({
       method: "POST",
       body: JSON.stringify({
         url: creation.url,
+        tags: [String(process.env.NEXT_PUBLIC_CLOUDINARY_CREATIONS_TAG)],
       }),
     }).then((r) => r.json());
 
