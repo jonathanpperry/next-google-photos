@@ -80,6 +80,35 @@ const MediaGallery = ({
   }
 
   /**
+   * handleOnCreateAnimation
+   */
+  function handleOnCreateAnimation() {
+    setCreation({
+      state: "created",
+      url: getAnimation(selected),
+      type: "animation",
+    });
+  }
+
+  /**
+   * handleOnCreateColorPop
+   */
+  async function handleOnCreateColorPop() {
+    const { url } = await fetch("/api/creations/color-pop", {
+      method: "POST",
+      body: JSON.stringify({
+        publicId: selected[0],
+      }),
+    }).then((r) => r.json());
+
+    setCreation({
+      state: "created",
+      url,
+      type: "color-pop",
+    });
+  }
+
+  /**
    * handleOnSaveCreation
    */
   async function handleOnSaveCreation() {
@@ -108,17 +137,6 @@ const MediaGallery = ({
     addResources([data]);
     setCreation(undefined);
     setSelected([]);
-  }
-
-  /**
-   * handleOnCreateAnimation
-   */
-  function handleOnCreateAnimation() {
-    setCreation({
-      state: "created",
-      url: getAnimation(selected),
-      type: "animation",
-    });
   }
 
   return (
@@ -186,6 +204,11 @@ const MediaGallery = ({
                     {selected.length === 1 && (
                       <DropdownMenuItem onClick={handleOnCreateAnimation}>
                         <span>Animation</span>
+                      </DropdownMenuItem>
+                    )}
+                    {selected.length === 1 && (
+                      <DropdownMenuItem onClick={handleOnCreateColorPop}>
+                        <span>Color Pop</span>
                       </DropdownMenuItem>
                     )}
                     {selected.length > 1 && (
